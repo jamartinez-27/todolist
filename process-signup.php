@@ -1,44 +1,56 @@
 <?php
-require_once "database.php";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = htmlspecialchars($_POST["username"]);
-    $email = htmlspecialchars($_POST["email"]);
-    $password = password_hash($_POST["password"], PASSWORD_DEFAULT); // Securely encrypt password
-
-    $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $username, $email, $password);
-
-    if ($stmt->execute()) {
-        echo "Signup successful! <a href='login.php'>Log in</a>";
-    } else {
-        echo "Error: " . $stmt->error;
-    }
-
-    $stmt->close();
-    $conn->close();
+if (empty($_POST["name"])) {
+    die("Username is required");
 }
-?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Sign Up</title>
-</head>
-<body>
-    <h2>Create an Account</h2>
-    <form method="POST">
-        <label>Username:</label>
-        <input type="text" name="username" required><br>
+if ( ! filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+    die("Valid email is required");
+}
 
-        <label>Email:</label>
-        <input type="email" name="email" required><br>
+if (strlen($_POST["password"]) < 8) {
+    die("Password must be at least 8 characters");
+}
 
-        <label>Password:</label>
-        <input type="password" name="password" required><br>
+if ( ! preg_match("/[a-z]/i", $_POST["password"])) {
+    die("Password must contain at least one letter");
+}
 
-        <input type="submit" value="Sign Up">
-    </form>
-    <p>Already have an account? <a href="login.php">Log in</a></p>
-</body>
-</html>
+if ( ! preg_match("/[0-9]/", $_POST["password"])) {
+    die("Password must contain at least one number");
+}
+
+if ($_POST["password"] !== $_POST["password_confirmation"]) {
+    die("Passwords must match");
+}
+
+$password_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
+
+$mysqli = require __DIR__ . "/database.php";
+
+$sql = "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)";
+        
+$stmt = $mysqli->stmt_init();
+
+if ( ! $stmt->prepare($sql)) {
+    die("SQL error: " . $mysqli->error);
+}
+
+$stmt->bind_param("sss",
+                  $_POST["name"],
+                  $_POST["email"],
+                  $password_hash);
+                  
+if ($stmt->execute()) {
+
+    header("Location: signup-success.php");
+    exit;
+    
+} else {
+    
+    if ($mysqli->errno === 1062) {
+        die("email already taken");
+    } else {
+        die($mysqli->error . " " . $mysqli->errno);
+    }
+}

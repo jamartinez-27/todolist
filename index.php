@@ -25,6 +25,7 @@ if (isset($_GET['delete'])) {
 $tasks = $conn->query("SELECT * FROM tasks WHERE Completed = 0 ORDER BY created_at DESC");
 ?>
 
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -34,30 +35,39 @@ $tasks = $conn->query("SELECT * FROM tasks WHERE Completed = 0 ORDER BY created_
 </head>
 <body>
     <h1>To-Do List</h1>
+
+    <!-- Logout Button -->
+    <?php if (isset($_SESSION["user_id"])): ?>
+        <form action="logout.php" method="post">
+            <button type="submit" class="logout-btn">Log Out</button>
+        </form>
+    <?php endif; ?>
+
     <form method="POST">
         <input type="text" name="title" required>
         <button type="submit">Add Task</button>
     </form>
+
     <ul>
-      <ul>
-    <?php while($row = $tasks->fetch_assoc()): ?>
-        <li class="<?php echo $row['Completed'] ? 'completed' : ''; ?>">
-    <span class="tasks-text"><?php echo htmlspecialchars($row['tasks']); ?></span>
-    <div class="button-group">
-        <?php if (!$row['Completed']): ?>
-            <a href="?complete=<?php echo $row['id']; ?>" class="btn complete" title="Mark as complete">
-                <i class="fas fa-check"></i>
-            </a>
-        <?php endif; ?>
-        <a href="?delete=<?php echo $row['id']; ?>" class="btn delete" onclick="return confirm('Are you sure?')" title="Delete task">
-            <i class="fas fa-trash"></i>
-        </a>
-    </div>
-</li>
-    <?php endwhile; ?>
-</ul>
+        <?php while($row = $tasks->fetch_assoc()): ?>
+            <li class="<?php echo $row['Completed'] ? 'completed' : ''; ?>">
+                <span class="tasks-text"><?php echo htmlspecialchars($row['tasks']); ?></span>
+                <div class="button-group">
+                    <?php if (!$row['Completed']): ?>
+                        <a href="?complete=<?php echo $row['id']; ?>" class="btn complete" title="Mark as complete">
+                            <i class="fas fa-check"></i>
+                        </a>
+                    <?php endif; ?>
+                    <a href="?delete=<?php echo $row['id']; ?>" class="btn delete" onclick="return confirm('Are you sure?')" title="Delete task">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </li>
+        <?php endwhile; ?>
     </ul>
+
 </body>
 </html>
+
 
 

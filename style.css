@@ -31,7 +31,7 @@ button {
     margin-left: 10px;
     background-color: #29db52;
     color: rgb(251, 253, 253);
-    border: none;
+    border:thick double #2b810f;;
     border-radius: 4px;
     cursor: pointer;
 }
@@ -106,3 +106,21 @@ li {
 .btn.delete:hover {
     background-color: #c82333;
 }
+
+.logout-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff4b5c;
+    color: white;
+    border:thick double #691002;;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.logout-btn:hover {
+    background-color: #ff1e38;
+}
+
+
